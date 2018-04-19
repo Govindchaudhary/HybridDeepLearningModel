@@ -3,6 +3,7 @@
 
 
 # Part 1 - Identify the Frauds with the Self-Organizing Map
+#ie. identifying the frauds with un-supervised learning algorithm
 
 # Importing the libraries
 import numpy as np
@@ -53,10 +54,12 @@ frauds = sc.inverse_transform(frauds)
 # Part 2 - Going from Unsupervised to Supervised Deep Learning
 
 # Creating the matrix of features
-customers = dataset.iloc[:, 1:].values
+customers = dataset.iloc[:, 1:].values   #taking all the features excluding customerid
 
 # Creating the dependent variable
-is_fraud = np.zeros(len(dataset))
+is_fraud = np.zeros(len(dataset)) #initially  for all customers set is_fraud=0
+#then loop over all the customers and if that customer is present in the frauds
+#set is_fraaud for that customer=1
 for i in range(len(dataset)):
     if dataset.iloc[i,0] in frauds:
         is_fraud[i] = 1
@@ -67,6 +70,7 @@ sc = StandardScaler()
 customers = sc.fit_transform(customers)
 
 # Part 2 - Now let's make the ANN!
+#small datset so simple ANN
 
 # Importing the Keras libraries and packages
 from keras.models import Sequential
@@ -76,6 +80,7 @@ from keras.layers import Dense
 classifier = Sequential()
 
 # Adding the input layer and the first hidden layer
+#we are adding all 2 nodes
 classifier.add(Dense(units = 2, kernel_initializer = 'uniform', activation = 'relu', input_dim = 15))
 
 # Adding the output layer
@@ -89,5 +94,5 @@ classifier.fit(customers, is_fraud, batch_size = 1, epochs = 2)
 
 # Predicting the probabilities of frauds
 y_pred = classifier.predict(customers)
-y_pred = np.concatenate((dataset.iloc[:, 0:1].values, y_pred), axis = 1)
-y_pred = y_pred[y_pred[:, 1].argsort()]
+y_pred = np.concatenate((dataset.iloc[:, 0:1].values, y_pred), axis = 1) #concatening the customerId and is_fraud horizontally(axis=1)
+y_pred = y_pred[y_pred[:, 1].argsort()] #sorting the 1st column of y_pred ie.is_fraud column
